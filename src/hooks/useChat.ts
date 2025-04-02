@@ -9,7 +9,7 @@ export const useChat = ({
   promptType = 'coach',
   langGraph = false
 }: {
-  promptType?: 'coach' | 'docteur';
+  promptType?: 'coach' | 'doctor';
   langGraph?: boolean;
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -48,7 +48,7 @@ export const useChat = ({
           };
 
           setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-        } else {
+        } else if (langGraph) {
           const response = await fetch('/api/lang-graph-chat', {
             method: 'POST',
             headers: {

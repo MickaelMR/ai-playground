@@ -14,7 +14,7 @@ const ChatBot = ({
   title = 'Coach Carter 🏀',
   langGraph = false
 }: {
-  promptType?: 'coach' | 'docteur';
+  promptType?: 'coach' | 'doctor';
   title?: string;
   className?: string;
   langGraph?: boolean;

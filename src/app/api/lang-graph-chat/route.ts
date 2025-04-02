@@ -10,11 +10,11 @@ import { ChatOpenAI } from '@langchain/openai';
 const memoryStore = new Map<string, any>();
 
 const getOrCreateAgent = ({ sessionId, promptType }: { sessionId: string; promptType: PromptType }) => {
-  if (memoryStore.has(sessionId)) {
-    return memoryStore.get(sessionId);
+  if (memoryStore.has(promptType)) {
+    return memoryStore.get(promptType);
   }
 
-  const tools = [new TavilySearchResults({ maxResults: 3 })];
+  const tools = [new TavilySearchResults({ maxResults: 10 })];
   const toolNode = new ToolNode(tools);
 
   const model = new ChatOpenAI({
@@ -35,9 +35,8 @@ const getOrCreateAgent = ({ sessionId, promptType }: { sessionId: string; prompt
 
   async function callModel(state: typeof MessagesAnnotation.State) {
     if (state.messages.length > 0 && !state.messages.some((msg) => msg instanceof SystemMessage)) {
-      console.log('JE PASSE PAR LA');
-      console.log(SYSTEM_PROMPT[promptType]);
       const promptTypeKey = promptType.toUpperCase() as PromptType;
+
       state.messages.unshift(new SystemMessage(SYSTEM_PROMPT[promptTypeKey]));
     }
 
@@ -55,15 +54,15 @@ const getOrCreateAgent = ({ sessionId, promptType }: { sessionId: string; prompt
 
   const app = workflow.compile();
 
-  memoryStore.set(sessionId, app);
+  memoryStore.set(promptType, app);
 
   return app;
 };
 
 export async function POST(req: Request) {
   try {
-    const { messages, sessionId = 'default', promptType = 'COACH' } = await req.json();
-
+    const { messages, sessionId = 'default', promptType } = await req.json();
+    console.log('promptType', promptType);
     const agent = getOrCreateAgent({ sessionId, promptType });
 
     const transformedMessages = messages
@@ -93,8 +92,6 @@ export async function POST(req: Request) {
         .replace(/\\n/g, '')
         .replace(/<html>|<\/html>|<body>|<\/body>/g, '');
     }
-
-    console.log({ response: JSON.stringify(responseMessage, null, 2) });
 
     return NextResponse.json({ message: responseMessage });
   } catch (error) {

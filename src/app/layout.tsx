@@ -34,13 +34,6 @@ const Layout = ({ children }: Readonly<{ children: ReactNode }>) => {
         <ThemeProvider attribute='class'>
           <NavigationBar />
           {children}
-          <div className='mt-10 flex flex-col items-center gap-4 text-center'>
-            <ChatBot promptType='coach' title='Coach Carter 🏀' />
-            <ChatBot promptType='docteur' title='Docteur Maboul 🩺' />
-            <h2 className='mt-10 text-2xl font-bold'>Lang Graph</h2>
-            <ChatBot langGraph promptType='coach' title='Coach Carter 🏀 Lang Graph' />
-            <ChatBot langGraph promptType='docteur' title='Docteur Maboul 🩺 Lang Graph' />
-          </div>
           <Toaster />
         </ThemeProvider>
       </body>
