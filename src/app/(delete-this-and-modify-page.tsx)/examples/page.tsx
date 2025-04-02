@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+'use client';
 
 import { AccordionDemo } from '@/components/accordion-demo';
 import { AlertDemo } from '@/components/alert-demo';
@@ -49,12 +49,7 @@ import { ToggleDemo } from '@/components/toggle-demo';
 import { ToggleGroupDemo } from '@/components/toggle-group-demo';
 import { TooltipDemo } from '@/components/tooltip-demo';
 
-export const metadata: Metadata = {
-  title: 'Examples',
-  description: 'Examples'
-};
-
-export default function SinkPage() {
+export default function Page() {
   return (
     <div className='mx-auto mt-4 grid max-w-7xl flex-1 gap-4'>
       <h2>These examples are taken from shadcn official repo on Github (https://github.com/shadcn-ui/ui)</h2>
