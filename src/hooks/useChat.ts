@@ -5,7 +5,13 @@ export type Message = {
   content: string;
 };
 
-export const useChat = ({ promptType = 'coach' }: { promptType?: 'coach' | 'docteur' }) => {
+export const useChat = ({
+  promptType = 'coach',
+  langGraph = false
+}: {
+  promptType?: 'coach' | 'docteur';
+  langGraph?: boolean;
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -21,27 +27,49 @@ export const useChat = ({ promptType = 'coach' }: { promptType?: 'coach' | 'doct
 
       try {
         const updatedMessages = [...messages, newUserMessage];
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ messages: updatedMessages, promptType })
-        });
 
-        if (!response.ok) {
-          throw new Error('Erreur lors de la communication avec le coach');
+        if (!langGraph) {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ messages: updatedMessages, promptType })
+          });
+
+          if (!response.ok) {
+            throw new Error('Erreur lors de la communication avec le coach');
+          }
+
+          const data = await response.json();
+          const assistantMessage: Message = {
+            role: 'assistant',
+            content: data.message.content
+          };
+
+          setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+        } else {
+          const response = await fetch('/api/lang-graph-chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ messages: updatedMessages, promptType })
+          });
+
+          if (!response.ok) {
+            throw new Error('Erreur lors de la communication avec le coach');
+          }
+
+          const data = await response.json();
+          const assistantMessage: Message = {
+            role: 'assistant',
+            content: data.message.content
+          };
+
+          setMessages((prevMessages) => [...prevMessages, assistantMessage]);
         }
-
-        const data = await response.json();
-        const assistantMessage: Message = {
-          role: 'assistant',
-          content: data.message.content
-        };
-
-        setMessages((prevMessages) => [...prevMessages, assistantMessage]);
       } catch (error) {
-        console.error('Erreur dans la conversation:', error);
         const errorMessage: Message = {
           role: 'assistant',
           content: "Désolé, j'ai rencontré un problème technique. Veuillez réessayer plus tard."

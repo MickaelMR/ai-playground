@@ -12,17 +12,18 @@ import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/regi
 const ChatBot = ({
   promptType = 'coach',
   title = 'Coach Carter 🏀',
-  className = ''
+  langGraph = false
 }: {
   promptType?: 'coach' | 'docteur';
   title?: string;
   className?: string;
+  langGraph?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const { messages, isLoading, sendMessage, resetChat } = useChat({ promptType });
+  const { messages, isLoading, sendMessage, resetChat } = useChat({ promptType, langGraph });
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -56,12 +57,8 @@ const ChatBot = ({
 
   return (
     <>
-      <Button
-        variant='default'
-        size='icon'
-        className={cn('fixed right-6 bottom-6 z-50 h-14 w-14 rounded-full shadow-lg', className)}
-        onClick={() => setIsOpen(true)}>
-        <LucideMessageSquare />
+      <Button variant='default' className='cursor-pointer' onClick={() => setIsOpen(true)}>
+        Chat with {title}
       </Button>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>

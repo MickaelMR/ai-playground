@@ -1,7 +1,6 @@
 import Image from 'next/image';
 
-import ExtensionDetails from '@/app/(delete-this-and-modify-page.tsx)/ExtensionDetails';
-import SetupDetails from '@/app/(delete-this-and-modify-page.tsx)/SetupDetails';
+import ChatBot from '@/components/ui/ChatBot';
 
 const HomePage: React.FC = () => {
   return (
