@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
 import { Input } from '@/registry/new-york-v4/ui/input';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/registry/new-york-v4/ui/sheet';
+import { Textarea } from '@/registry/new-york-v4/ui/textarea';
 
 const ChatBot = ({
   promptType = PromptType.COACH,
@@ -40,6 +41,12 @@ const ChatBot = ({
     setInput('');
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
   const MessageBubble = ({ message }: { message: Message }) => {
     const isUser = message.role === 'user';
 
@@ -108,11 +115,12 @@ const ChatBot = ({
 
           <div className='bg-background border-t p-4'>
             <form onSubmit={handleSendMessage} className='flex w-full gap-2'>
-              <Input
+              <Textarea
                 placeholder='Écrivez votre message ici...'
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={isLoading}
+                onKeyDown={handleKeyDown}
                 className='flex-1'
               />
               <Button type='submit' disabled={isLoading || !input.trim()} size='icon'>
