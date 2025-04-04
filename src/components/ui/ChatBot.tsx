@@ -3,6 +3,7 @@
 import { LucideMessageSquare, LucideRefreshCw, LucideSend, LucideX } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { PromptType } from '@/constants/prompt-system';
 import { Message, useChat } from '@/hooks/useChat';
 import { cn } from '@/lib/utils';
 import { Button } from '@/registry/new-york-v4/ui/button';
@@ -10,11 +11,11 @@ import { Input } from '@/registry/new-york-v4/ui/input';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/registry/new-york-v4/ui/sheet';
 
 const ChatBot = ({
-  promptType = 'coach',
+  promptType = PromptType.COACH,
   title = 'Coach Carter 🏀',
   langGraph = false
 }: {
-  promptType?: 'coach' | 'doctor';
+  promptType?: PromptType;
   title?: string;
   className?: string;
   langGraph?: boolean;
@@ -83,7 +84,6 @@ const ChatBot = ({
             ref={messagesContainerRef}
             className='flex-1 overflow-y-auto px-4 py-4'
             style={{ height: 'calc(100vh - 140px)' }}>
-            {/* Messages */}
             {messages.slice(1).map((msg, index) => (
               <MessageBubble key={index} message={msg} />
             ))}

@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { PromptType } from '@/constants/prompt-system';
+
 export type Message = {
   role: 'user' | 'assistant' | 'system';
   content: string;
 };
 
 export const useChat = ({
-  promptType = 'coach',
+  promptType = PromptType.COACH,
   langGraph = false
 }: {
-  promptType?: 'coach' | 'doctor';
+  promptType?: PromptType;
   langGraph?: boolean;
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);

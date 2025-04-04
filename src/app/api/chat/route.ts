@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: messagesWithSystem,
-      temperature: 0.7
+      temperature: 0.4
     });
 
     const responseMessage = response.choices[0].message;
