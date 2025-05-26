@@ -1,6 +1,6 @@
 'use client';
 
-import { LucideMic, LucideRefreshCw, LucideSend, LucideX } from 'lucide-react';
+import { LucideMic, LucideRefreshCw, LucideSend, LucideVolume2, LucideX } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { PromptType } from '@/constants/prompt-system';
@@ -45,9 +45,30 @@ const ChatBot = ({
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, sendMessage, resetChat } = useChat({ promptType, langGraph });
+
+  const speak = (text: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  useEffect(() => {
+    if (autoSpeak && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        speak(lastMessage.content.replace(/<[^>]*>/g, ''));
+      }
+    }
+  }, [messages, autoSpeak]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -82,9 +103,12 @@ const ChatBot = ({
         setIsListening(true);
       };
 
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
+      recognition.onresult = async (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
-        setInput((prev) => prev + ' ' + transcript);
+        setInput(transcript);
+
+        await sendMessage(transcript);
+        setInput('');
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -98,7 +122,7 @@ const ChatBot = ({
 
       recognition.start();
     } else {
-      alert("La reconnaissance vocale n'est pas supportée par votre navigateur.");
+      console.error('pas de reconnaissance vocale sur ce browser');
     }
   };
 
@@ -118,6 +142,8 @@ const ChatBot = ({
     );
   };
 
+  console.log(autoSpeak);
+
   return (
     <>
       <Button variant='default' className='cursor-pointer' onClick={() => setIsOpen(true)}>
@@ -130,6 +156,13 @@ const ChatBot = ({
             <SheetTitle className='flex items-center justify-between text-lg font-semibold'>
               <span>{title}</span>
               <div className='flex items-center gap-2'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  title='Activer/Désactiver la synthèse vocale'
+                  onClick={() => setAutoSpeak(!autoSpeak)}>
+                  <LucideVolume2 className='h-4 w-4' color={autoSpeak ? '#3e9392' : 'white'} />
+                </Button>
                 <Button variant='ghost' size='icon' title='Réinitialiser la conversation' onClick={resetChat}>
                   <LucideRefreshCw className='h-4 w-4' />
                 </Button>
