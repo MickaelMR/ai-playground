@@ -1,6 +1,6 @@
 'use client';
 
-import { LucideMessageSquare, LucideRefreshCw, LucideSend, LucideX } from 'lucide-react';
+import { LucideMic, LucideRefreshCw, LucideSend, LucideX } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { PromptType } from '@/constants/prompt-system';
@@ -10,6 +10,27 @@ import { Button } from '@/registry/new-york-v4/ui/button';
 import { Input } from '@/registry/new-york-v4/ui/input';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/registry/new-york-v4/ui/sheet';
 import { Textarea } from '@/registry/new-york-v4/ui/textarea';
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+    SpeechRecognition: any;
+  }
+}
+
+interface SpeechRecognitionEvent {
+  results: {
+    [key: number]: {
+      [key: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string;
+}
 
 const ChatBot = ({
   promptType = PromptType.COACH,
@@ -23,6 +44,7 @@ const ChatBot = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, sendMessage, resetChat } = useChat({ promptType, langGraph });
@@ -47,6 +69,39 @@ const ChatBot = ({
       handleSendMessage();
     }
   };
+
+  const startListening = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'fr-FR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = event.results[0][0].transcript;
+        setInput((prev) => prev + ' ' + transcript);
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Erreur de reconnaissance vocale:', event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } else {
+      alert("La reconnaissance vocale n'est pas supportée par votre navigateur.");
+    }
+  };
+
   const MessageBubble = ({ message }: { message: Message }) => {
     const isUser = message.role === 'user';
 
@@ -123,6 +178,15 @@ const ChatBot = ({
                 onKeyDown={handleKeyDown}
                 className='flex-1'
               />
+              <Button
+                type='button'
+                onClick={startListening}
+                disabled={isLoading || isListening}
+                size='icon'
+                variant='outline'
+                className={cn(isListening && 'bg-red-500 text-white')}>
+                <LucideMic className='h-4 w-4' />
+              </Button>
               <Button type='submit' disabled={isLoading || !input.trim()} size='icon'>
                 <LucideSend className='h-4 w-4' />
               </Button>
