@@ -20,6 +20,7 @@ const Page = () => {
         <ChatBot langGraph promptType={PromptType.WORKPLACE_WELLBEING} title='Dr. Phil Good 🧠 ' />
         <ChatBot langGraph promptType={PromptType.STOP_TABAC} title='Cloppy le Fumeur Repenti 🚭 ' />
         <ChatBot langGraph promptType={PromptType.MADAME_DOUBTFIRE} title='Madame Doubtfire 👶 ' />
+        <ChatBot langGraph promptType={PromptType.LINKEDIN_RECRUITER} title='LinkedInBot Pro 💼 ' />
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import SYSTEM_PROMPT, { PromptType } from '@/constants/prompt-system';
+import { linkedInTools } from '@/utils/linkedin-tools';
 import { TavilySearchResults } from '@langchain/community/tools/tavily_search';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { MessagesAnnotation, StateGraph } from '@langchain/langgraph';
@@ -14,7 +15,16 @@ const getOrCreateAgent = ({ sessionId, promptType }: { sessionId: string; prompt
     return memoryStore.get(promptType);
   }
 
-  const tools = [new TavilySearchResults({ maxResults: 10 })];
+  const getTools = (promptType: PromptType) => {
+    if (promptType === PromptType.LINKEDIN_RECRUITER) {
+      return linkedInTools;
+    } else {
+      return [new TavilySearchResults({ maxResults: 10 })];
+    }
+  };
+
+  const tools = getTools(promptType);
+
   const toolNode = new ToolNode(tools);
 
   const model = new ChatOpenAI({
