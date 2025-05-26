@@ -88,12 +88,16 @@ export const googleSheetsWriteTool = new DynamicStructuredTool({
         })
       )
       .describe('List of LinkedIn profiles to save'),
-    sheet_name: z.string().optional().default('Profils LinkedIn').describe('Name of the sheet in the Google Sheet')
+    search_query: z.string().describe('Original search query used to find profiles'),
+    sheet_name: z.string().optional().describe('Optional custom sheet name')
   }),
-  func: async ({ profiles, sheet_name = 'Profils LinkedIn' }) => {
+  func: async ({ profiles, search_query, sheet_name, ...rest }) => {
     try {
       console.log('Start of Google Sheets save...');
       console.log('Profiles to save:', profiles.length);
+      console.log('Search query:', search_query);
+      console.log('Sheet name:', sheet_name);
+      console.log('Rest:', rest);
 
       const clientEmail = process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
       const privateKey = process.env.GOOGLE_SHEETS_PRIVATE_KEY;
@@ -116,10 +120,42 @@ export const googleSheetsWriteTool = new DynamicStructuredTool({
 
       const sheets = google.sheets({ version: 'v4', auth });
 
-      console.log('Preparing data...');
-      const headers = ['Nom', 'Titre', 'Entreprise', 'Localisation', 'URL Profil', 'Description', 'Date Ajout'];
-      const currentDate = new Date().toLocaleDateString('fr-FR');
+      const currentDate = new Date();
+      const dateStr = currentDate.toLocaleDateString('fr-FR').replace(/\//g, '-');
+      const timeStr = currentDate.toLocaleTimeString('fr-FR').replace(/:/g, '-');
+      const searchTermForSheet = search_query
+        .slice(0, 20)
+        .replace(/[^\w\s-]/g, '')
+        .trim();
+      const generatedSheetName = sheet_name || `${searchTermForSheet}_${dateStr}_${timeStr}`;
 
+      console.log('Creating new sheet:', generatedSheetName);
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              addSheet: {
+                properties: {
+                  title: generatedSheetName
+                }
+              }
+            }
+          ]
+        }
+      });
+
+      console.log('Preparing data...');
+      const headers = [
+        'Nom',
+        'Titre',
+        'Entreprise',
+        'Localisation',
+        'URL Profil',
+        'Description',
+        'Date Ajout',
+        'Recherche'
+      ];
       const values = [
         headers,
         ...profiles.map((profile) => [
@@ -129,46 +165,15 @@ export const googleSheetsWriteTool = new DynamicStructuredTool({
           profile.location,
           profile.profile_url,
           profile.snippet || '',
-          currentDate
+          currentDate.toLocaleDateString('fr-FR'),
+          search_query
         ])
       ];
-
-      console.log('Checking sheet:', sheet_name);
-      try {
-        await sheets.spreadsheets.get({
-          spreadsheetId,
-          ranges: [sheet_name]
-        });
-        console.log('Sheet found');
-      } catch (error) {
-        console.log('Creating sheet:', sheet_name);
-
-        await sheets.spreadsheets.batchUpdate({
-          spreadsheetId,
-          requestBody: {
-            requests: [
-              {
-                addSheet: {
-                  properties: {
-                    title: sheet_name
-                  }
-                }
-              }
-            ]
-          }
-        });
-      }
-
-      console.log('Cleaning sheet');
-      await sheets.spreadsheets.values.clear({
-        spreadsheetId,
-        range: `${sheet_name}!A:G`
-      });
 
       console.log('Writing in progress');
       const response = await sheets.spreadsheets.values.update({
         spreadsheetId,
-        range: `${sheet_name}!A1`,
+        range: `${generatedSheetName}!A1`,
         valueInputOption: 'RAW',
         requestBody: {
           values
@@ -179,8 +184,9 @@ export const googleSheetsWriteTool = new DynamicStructuredTool({
 
       return JSON.stringify({
         success: true,
-        message: `${profiles.length} profils sauvegardés avec succès dans l'onglet "${sheet_name}"`,
+        message: `${profiles.length} profils sauvegardés avec succès dans le nouvel onglet "${generatedSheetName}"`,
         spreadsheet_url: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`,
+        sheet_name: generatedSheetName,
         updated_cells: response.data.updatedCells
       });
     } catch (error) {
