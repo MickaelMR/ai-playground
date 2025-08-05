@@ -1,16 +1,17 @@
-name: Claude Code
+name: Claude Code Action
 
 on:
   issue_comment:
-    types: [created]
+    types: [created, edited]
   pull_request_review_comment:
-    types: [created]
+    types: [created, edited]
 
 jobs:
-  claude-code:
+  claude-action:
     if: contains(github.event.comment.body, '@claude')
     runs-on: ubuntu-latest
     steps:
-      - uses: anthropics/claude-code-action@v1
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@main
         with:
-          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
