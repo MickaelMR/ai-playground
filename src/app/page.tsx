@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 const Page = () => {
   return (
     <>
-      <h1 className='text-4xl font-bold text-center mt-8 mb-8'>TITRE CHANGE DANS LE COMMENT DE LA PR 🎉</h1>
+      <div className='text-center mt-8 mb-8'>
+        <h1 className='text-4xl font-bold mb-2'>🦄 IA Playground - Ton assistant magique</h1>
+        <p className='text-lg text-gray-600'>Découvrez notre collection d'assistants IA spécialisés pour vous accompagner dans vos projets professionnels et personnels</p>
+      </div>
       <HomePage />
       <div className='mt-10 flex flex-col items-center gap-4 text-center'>
         {/*  <ChatBot langGraph promptType={PromptType.COACH} title='Coach Carter 🏀 ' />
