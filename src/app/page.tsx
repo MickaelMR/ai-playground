@@ -13,8 +13,8 @@ const Page = () => {
   return (
     <>
       <div className='text-center mt-8 mb-8'>
-        <h1 className='text-4xl font-bold mb-2'>🦄 IA Playground - Ton assistant magique</h1>
-        <p className='text-lg text-gray-600'>Découvrez notre collection d'assistants IA spécialisés pour vous accompagner dans vos projets professionnels et personnels</p>
+        <h1 className='text-4xl font-bold mb-2'>🦄 AI Playground - Plateforme d'Assistants IA Spécialisés pour le Bien-être et la Productivité</h1>
+        <p className='text-lg text-gray-600'>Accédez à 7 assistants IA experts : Madame Doubtfire (conseils parentaux), LinkedInBot Pro (recrutement), Coach Carter (coaching de vie), Docteur Maboul (conseils santé), Météo (planification), Dr. Phil Good (bien-être au travail) et Cloppy (arrêt du tabac)</p>
       </div>
       <HomePage />
       <div className='mt-10 flex flex-col items-center gap-4 text-center'>
